@@ -6,4 +6,4 @@
 - можно просматривать всех админов, добавлять новых (может только Бог(главный админ)), а так же удалять админов
 - отвечать на сообщения или удалять из вашего чата 
 
-![](https://psv4.userapi.com/c537232/u263813557/docs/d30/250e8384c7a7/feedback.jpg)
+<img src="https://raw.githubusercontent.com/FSystem88/feedback_tg_bot/main/feedback.jpg" width="50%">
