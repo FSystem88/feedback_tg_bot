@@ -15,5 +15,5 @@ INSERT INTO `AdminsFeedback` (`id`, `tgid`, `name`, `username`, `status`) VALUES
 ALTER TABLE `AdminsFeedback`
   ADD PRIMARY KEY (`id`);
 
-ALTER TABLE `adminsKATE`
+ALTER TABLE `AdminsFeedback`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=;
