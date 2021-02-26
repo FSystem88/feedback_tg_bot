@@ -80,10 +80,13 @@ def admins(message):
 		bot.register_next_step_handler(message, admins1)		
 		res = r.get(url+"all.php").json()
 		for own in res:
-			key = types.InlineKeyboardMarkup()
-			but1 = types.InlineKeyboardButton(text="Удалить админа", callback_data="deladmin{}".format(own['tgid']))
-			key.add(but1)
-			bot.send_message(message.chat.id, "Имя: <a href='tg://user?id={}'>{}</a>\n@{}".format(own['tgid'], own['name'], own['username']), parse_mode="html", reply_markup=key)
+			if own['status'] == "god":
+				bot.send_message(message.chat.id, "<b>БОГ</b>\nИмя: <a href='tg://user?id={}'>{}</a>\n@{}".format(own['tgid'], own['name'], own['username']), parse_mode="html")
+			else:
+				key = types.InlineKeyboardMarkup()
+				but1 = types.InlineKeyboardButton(text="Удалить админа", callback_data="deladmin{}".format(own['tgid']))
+				key.add(but1)
+				bot.send_message(message.chat.id, "Имя: <a href='tg://user?id={}'>{}</a>\n@{}".format(own['tgid'], own['name'], own['username']), parse_mode="html", reply_markup=key)
 
 	else:
 		bot.send_message(message.chat.id, "Эта функция доступна тольк главному администратору")
