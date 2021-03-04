@@ -3,13 +3,17 @@ require "bd.php";
 
 $status = $_POST['status'];
 
-if ( $status == "" )
+if ( $status == "admins" )
 {
-	$result = mysqli_query($link, "select * from AdminsFeedback");
+	$result = mysqli_query($link, "SELECT * FROM AdminsFeedback WHERE status NOT LIKE 'user'");
 }
-else
+elseif ( $status == "god" )
 {
-	$result = mysqli_query($link, "select * from AdminsFeedback where status='{$status}'");
+	$result = mysqli_query($link, "SELECT * FROM AdminsFeedback WHERE status='god'");
+}
+elseif ( $status == "user" )
+{
+	$result = mysqli_query($link, "SELECT * FROM AdminsFeedback WHERE status='user'");
 }
 
 $row = mysqli_fetch_all($result, MYSQLI_ASSOC);
