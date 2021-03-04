@@ -1,5 +1,5 @@
 # feedback_tg_bot
-Телеграм бот для обратной связи (техподдержка) с дополнительным функционалом
+Телеграм бот для обратной связи (техподдержка) с дополнительным функционалом<br>
 Telegram bot for feedback (technical support) with additional functionality
 
 # Возможности
