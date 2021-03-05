@@ -16,6 +16,14 @@ url = "https://example.com/feedback_bot/php/"
 @bot.message_handler(commands=['start'])
 def start(message):
 	try:
+		res = r.post(url+"adm.php", data={"data":"find","tgid": message.chat.id}).json()
+		if res == []:
+			r.post(url+"adm.php", data={
+				"data":"adduser",
+				"tgid": message.chat.id,
+				"name": message.chat.first_name,
+				"username": message.chat.username
+			} )
 		if str(message.chat.id) in owners():
 			Home(message)
 		else:
@@ -104,16 +112,20 @@ def admins1(message):
 def reply(message):
 	global tgid
 	global text
-	bot.send_message(tgid, '''<b>Ответ получен:</b>\n\n{}\n\n<i>С уважением админ {}</i>'''.format(message.text, NAME), parse_mode="html")
-	bot.send_message(message.chat.id, "Сообщение отправлено!")
-	r.post(url+"mess.php", data={
-		"data" : "reply",
-		"answer" : message.text,
-		"adminID" : message.chat.id,
-		"adminName" : message.chat.first_name,
-		"text" : text,
-		"tgid" : tgid
-	})
+	if message.text == "Отмена":
+		bot.send_message(message.chat.id, "<i>Отменено</i>", parse_mode="html")
+		Home(message)
+	else:
+		bot.send_message(tgid, '''<b>Ответ получен:</b>\n\n{}\n\n<i>С уважением админ {}</i>'''.format(message.text, NAME), parse_mode="html")
+		bot.send_message(message.chat.id, "Сообщение отправлено!")
+		r.post(url+"mess.php", data={
+			"data" : "reply",
+			"answer" : message.text,
+			"adminID" : message.chat.id,
+			"adminName" : message.chat.first_name,
+			"text" : text,
+			"tgid" : tgid
+		})
 
 
 def Messages(message):
@@ -228,13 +240,17 @@ def inline(call):
 		global text
 		tgid = int(call.data[5:])
 		text = call.message.text.split("\nТекст:\n", 1)[1]
-		bot.send_message(call.message.chat.id, "Введите ответ:")
+		keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+		keyboard.row('Отмена')
+		bot.send_message(call.message.chat.id, "Введите ответ:", reply_markup=keyboard)
 		bot.register_next_step_handler(call.message, reply)
 
 	elif call.data[:6] == "rreply":
 		tgid = int(call.data[6:])
 		text = call.message.text.split("\nТекст:\n", 1)[1].split("\nАдмин:")[0]
-		bot.send_message(call.message.chat.id, "Введите ответ:")
+		keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+		keyboard.row('Отмена')
+		bot.send_message(call.message.chat.id, "Введите ответ:", reply_markup=keyboard)
 		bot.register_next_step_handler(call.message, reply)
 
 
