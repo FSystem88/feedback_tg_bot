@@ -126,6 +126,7 @@ def reply(message):
 			"text" : text,
 			"tgid" : tgid
 		})
+		Home(message)
 
 
 def Messages(message):
