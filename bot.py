@@ -10,6 +10,7 @@ bot = telebot.TeleBot("")
 NAME = " ИМЯ ВАШЕГО МАГАЗИНА/БРЭНДА/КАНАЛА "
 url = "https://example.com/feedback_tg_bot/php/"
 
+
 ######################################################### / C O M M A N D S ##############################################################
 
 
@@ -117,6 +118,7 @@ def admins1(message):
 				key.add(but)
 				bot.send_message(message.chat.id, "Имя: <a href='tg://user?id={}'>{}</a> (@{})\nID: <code>{}</code>".format(user['tgid'], user['name'], user['username'], user['tgid']), parse_mode="html", reply_markup=key)
 		bot.register_next_step_handler(message, admins1)
+	
 	elif message.text == "Добавить в ЧС":
 		keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
 		keyboard.row('Отмена')
