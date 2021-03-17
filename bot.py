@@ -39,7 +39,7 @@ def getadmin(message):
 	if str(message.chat.id) in owners():
 		bot.send_message(message.chat.id, "<b>Вы уже администратор!</b>", parse_mode="html")
 	else:
-		res = r.post(url+"all.php", data={"status":"god"}).json()
+		res = r.post(url+"adm.php", data={"data":"god"}).json()
 		idgod = res[0]['tgid']
 		key = types.InlineKeyboardMarkup()
 		but1 = types.InlineKeyboardButton(text="Принять", callback_data="addadmin{}".format(message.chat.id))
@@ -62,14 +62,14 @@ def restart(message):
 
 def owners():
 	owns = []
-	res = r.post(url+"all.php", data={"status":"admins"}).json()
+	res = r.post(url+"adm.php", data={"data":"admins"}).json()
 	for i in res:
 		owns.append(i['tgid'])
 	return owns
 
 
 def Home(message):
-	res = r.post(url+"all.php", data={"status":"god"}).json()
+	res = r.post(url+"adm.php", data={"data":"god"}).json()
 	idgod = res[0]['tgid']
 	keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
 	if str(message.chat.id) == idgod:
@@ -80,7 +80,7 @@ def Home(message):
 
 
 def admins(message):
-	res = r.post(url+"all.php", data={"status":"god"}).json()
+	res = r.post(url+"adm.php", data={"data":"god"}).json()
 	idgod = res[0]['tgid']
 	if str(message.chat.id) == idgod:
 		keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -88,7 +88,7 @@ def admins(message):
 		keyboard.row('Черный список','Добавить в ЧС')
 		keyboard.row('Домой')
 		bot.send_message(message.chat.id, "Все админы:", reply_markup=keyboard)
-		res = r.post(url+"all.php", data={"status":"admins"}).json()
+		res = r.post(url+"adm.php", data={"data":"admins"}).json()
 		for own in res:
 			if own['status'] == "god":
 				bot.send_message(message.chat.id, "<b>БОГ</b>\nИмя: <a href='tg://user?id={}'>{}</a>\n@{}".format(own['tgid'], own['name'], own['username']), parse_mode="html")
@@ -117,7 +117,6 @@ def admins1(message):
 				key.add(but)
 				bot.send_message(message.chat.id, "Имя: <a href='tg://user?id={}'>{}</a> (@{})\nID: <code>{}</code>".format(user['tgid'], user['name'], user['username'], user['tgid']), parse_mode="html", reply_markup=key)
 		bot.register_next_step_handler(message, admins1)
-	
 	elif message.text == "Добавить в ЧС":
 		keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
 		keyboard.row('Отмена')
