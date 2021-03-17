@@ -7,8 +7,8 @@ from telebot import types
 
 bot = telebot.TeleBot("")
 
-NAME = "ИМЯ МАГАЗИНА"
-url = "https://example.com/feedback_bot/php/"
+NAME = " ИМЯ ВАШЕГО МАГАЗИНА/БРЭНДА/КАНАЛА "
+url = "https://example.com/feedback_tg_bot/php/"
 
 ######################################################### / C O M M A N D S ##############################################################
 
@@ -84,7 +84,8 @@ def admins(message):
 	idgod = res[0]['tgid']
 	if str(message.chat.id) == idgod:
 		keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
-		keyboard.row('Добавить')
+		keyboard.row('Добавить админа')
+		keyboard.row('Черный список','Добавить в ЧС')
 		keyboard.row('Домой')
 		bot.send_message(message.chat.id, "Все админы:", reply_markup=keyboard)
 		res = r.post(url+"all.php", data={"status":"admins"}).json()
@@ -102,11 +103,42 @@ def admins(message):
 
 
 def admins1(message):
-	if message.text == "Добавить":
+	if message.text == "Добавить админа":
 		bot.send_message(message.chat.id, "Чтобы добавить нового администратора надо чтобы кандидат отправил боту команду:\n\n/getadmin\n\nПринять заявку может только самый главный админ.")
 		bot.register_next_step_handler(message, admins1)
+	elif message.text == "Черный список":
+		res = r.post(url+"adm.php", data={"data":"allblock"}).json()
+		if res == []:
+			bot.send_message(message.chat.id, "Черный список пуст!")
+		else:
+			for user in res:
+				key = types.InlineKeyboardMarkup()
+				but = types.InlineKeyboardButton(text="Разблокировать", callback_data="delban{}".format(user['tgid']))
+				key.add(but)
+				bot.send_message(message.chat.id, "Имя: <a href='tg://user?id={}'>{}</a> (@{})\nID: <code>{}</code>".format(user['tgid'], user['name'], user['username'], user['tgid']), parse_mode="html", reply_markup=key)
+		bot.register_next_step_handler(message, admins1)
+	
+	elif message.text == "Добавить в ЧС":
+		keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+		keyboard.row('Отмена')
+		bot.send_message(message.chat.id, "Введите id пользователя", reply_markup=keyboard)
+		bot.register_next_step_handler(message, block)
 	elif message.text == "Домой":
 		Home(message)
+
+
+def block(message):
+	if message.text == "Отмена":
+		admins(message)
+	else:
+		res = r.post(url+"adm.php", data={"data":"find","tgid":message.text}).json()
+		if res == []:
+			bot.send_message(message.chat.id, "Пользователь не найден")
+			bot.register_next_step_handler(message, block)
+		else:
+			bot.send_message(message.chat.id, "‼️ ЗАБЛОКИРОВАН ‼️\n<a href='tg://user?id={}'>{}</a> (@{})\nID: <code>{}</code>".format(res[0]['tgid'], res[0]['name'], res[0]['username'], res[0]['tgid']), parse_mode="html")
+			r.post(url+"adm.php", data={"data":"block", "tgid":res[0]['tgid']})
+			admins(message)
 
 
 def reply(message):
@@ -174,24 +206,27 @@ def Messages1(message):
 
 @bot.message_handler(func=lambda message: True, content_types=['text'])
 def Main(message):
-	TEXT = message.text
-	if TEXT == "Домой":
-		Home(message)
-	elif TEXT == "Админы":
-		admins(message)
-	elif TEXT == "Cообщения":
-		Messages(message)
+	res = r.post(url+"adm.php", data={"data":"checkblock", "tgid":message.chat.id}).json()
+	if res == []:
+		TEXT = message.text
+		if TEXT == "Домой":
+			Home(message)
+		elif TEXT == "Админы":
+			admins(message)
+		elif TEXT == "Cообщения":
+			Messages(message)
+		else:
+			if str(message.chat.id) not in owners():
+				r.post(url+"mess.php", data={"data":"new","tgid":message.chat.id,"name":message.chat.first_name,"username":message.chat.username,"text":message.text})
+				for own in owners():
+					key = types.InlineKeyboardMarkup()
+					but1 = types.InlineKeyboardButton(text="Ответить", callback_data="reply{}".format(message.chat.id))
+					but2 = types.InlineKeyboardButton(text="Удалить", callback_data="delete{}".format(message.chat.id))
+					key.add(but1, but2)
+					bot.send_message(own, '''<b>Получен новый вопрос!</b>\n<b>От:</b> <a href='tg://user?id={}'>{}</a> (@{})\n<b>Текст:</b>\n<i>{}</i>'''.format(message.chat.id, message.chat.first_name, message.chat.username, message.text), parse_mode="html", reply_markup=key)
+				bot.send_message(message.chat.id, "Сообщение отправлено!")
 	else:
-		if str(message.chat.id) not in owners():
-			r.post(url+"mess.php", data={"data":"new","tgid":message.chat.id,"name":message.chat.first_name,"username":message.chat.username,"text":message.text})
-			for own in owners():
-				key = types.InlineKeyboardMarkup()
-				but1 = types.InlineKeyboardButton(text="Ответить", callback_data="reply{}".format(message.chat.id))
-				but2 = types.InlineKeyboardButton(text="Удалить", callback_data="delete{}".format(message.chat.id))
-				key.add(but1, but2)
-				bot.send_message(own, '''<b>Получен новый вопрос!</b>\n<b>От:</b> <a href='tg://user?id={}'>{}</a> (@{})\n<b>Текст:</b>\n<i>{}</i>'''.format(message.chat.id, message.chat.first_name, message.chat.username, message.text), parse_mode="html", reply_markup=key)
-			bot.send_message(message.chat.id, "Сообщение отправлено!")
-
+		bot.send_message(message.chat.id, "Вы заблокированы ‼️")
 
 ###################################################### C A L L B A C K ###################################################################
 
@@ -253,6 +288,11 @@ def inline(call):
 		keyboard.row('Отмена')
 		bot.send_message(call.message.chat.id, "Введите ответ:", reply_markup=keyboard)
 		bot.register_next_step_handler(call.message, reply)
+
+	elif call.data[:6] == "delban":
+		_tgid = call.data[6:]
+		bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="<i>Пользователь разблокирован</i>", parse_mode="html")
+		r.post(url+"adm.php", data={"data":"delblock", "tgid":_tgid})
 
 
 ######################################################## L A U N C H #####################################################################
