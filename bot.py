@@ -9,7 +9,8 @@ bot = telebot.TeleBot("")
 
 NAME = " ИМЯ ВАШЕГО МАГАЗИНА/БРЭНДА/КАНАЛА "
 url = "https://example.com/feedback_tg_bot/php/"
-
+# ВМЕСТО example.com НА ПИШИТЕ ВАШ САЙТ ГДЕ ВЫ РАЗМЕСТИЛИ API (папку php из этого репозитория)
+# либо просто напишите мне @FSystem88_bot и я за скромную плату смогу разместить API и БД у себя на web сервере 
 
 ######################################################### / C O M M A N D S ##############################################################
 
@@ -87,6 +88,7 @@ def admins(message):
 		keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
 		keyboard.row('Добавить админа')
 		keyboard.row('Черный список','Добавить в ЧС')
+		keyboard.row('Отправить всем сообщение')
 		keyboard.row('Домой')
 		bot.send_message(message.chat.id, "Все админы:", reply_markup=keyboard)
 		res = r.post(url+"adm.php", data={"data":"admins"}).json()
@@ -118,14 +120,39 @@ def admins1(message):
 				key.add(but)
 				bot.send_message(message.chat.id, "Имя: <a href='tg://user?id={}'>{}</a> (@{})\nID: <code>{}</code>".format(user['tgid'], user['name'], user['username'], user['tgid']), parse_mode="html", reply_markup=key)
 		bot.register_next_step_handler(message, admins1)
-	
 	elif message.text == "Добавить в ЧС":
 		keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
 		keyboard.row('Отмена')
 		bot.send_message(message.chat.id, "Введите id пользователя", reply_markup=keyboard)
 		bot.register_next_step_handler(message, block)
+	elif message.text == "Отправить всем сообщение":
+		keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+		keyboard.row('Отмена')
+		bot.send_message(message.chat.id, "Введите сообщение:", reply_markup=keyboard)
+		bot.register_next_step_handler(message, sends)
 	elif message.text == "Домой":
 		Home(message)
+
+
+def sends(message):
+	if message.text == "Отмена":
+		admins(message)
+	else:
+		res = r.post(url+"adm.php", data={"data":"user"}).json()
+		for user in res:
+			thread_list = []
+			t = threading.Thread (target=sends1, args=(message, user['tgid'], message.text))
+			thread_list.append(t)
+			t.start()
+		bot.send_message(message.chat.id, "Отправлено!")
+		Home(message)
+
+
+def sends1(message, tgid, text):
+	try:
+		bot.send_message(tgid, text)
+	except:
+		pass
 
 
 def block(message):
