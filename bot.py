@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 # Dev: FSystem88
 
-import telebot, requests as r, time
+import telebot, requests as r, time, threading
 from telebot import types
-
+from threading import Thread
 bot = telebot.TeleBot("")
 
 NAME = " ИМЯ ВАШЕГО МАГАЗИНА/БРЭНДА/КАНАЛА "
