@@ -2,12 +2,13 @@
 DROP TABLE IF EXISTS `AdminsFeedback`;
 CREATE TABLE `AdminsFeedback` (
   `id` int(11) NOT NULL,
-  `tgid` varchar(64) CHARACTER SET utf8 NOT NULL,
-  `name` varchar(64) CHARACTER SET utf8 NOT NULL,
-  `username` varchar(64) CHARACTER SET utf8 NOT NULL,
-  `status` varchar(64) CHARACTER SET utf8 NOT NULL,
-  `ban` varchar(3) CHARACTER SET utf8 NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+  `tgid` varchar(64) CHARACTER SET utf8mb4 NOT NULL,
+  `name` varchar(64) CHARACTER SET utf8mb4 NOT NULL,
+  `username` varchar(64) CHARACTER SET utf8mb4 NOT NULL,
+  `status` varchar(64) CHARACTER SET utf8mb4 NOT NULL,
+  `ban` varchar(3) CHARACTER SET utf8mb4 NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 INSERT INTO `AdminsFeedback` (`id`, `tgid`, `name`, `username`, `status`) VALUES
 (1, 'ТВОЙ АЙДИ В ТЕЛЕГЕ', 'ТВОЁ ИМЯ', 'ТВОЙ ЮЗЕРНЕЙМ', 'god');
 
@@ -23,17 +24,17 @@ ALTER TABLE `AdminsFeedback`
 DROP TABLE IF EXISTS `MessFeedback`;
 CREATE TABLE `MessFeedback` (
   `id` int(11) NOT NULL,
-  `tgid` varchar(64) CHARACTER SET utf8 NOT NULL,
-  `name` varchar(64) CHARACTER SET utf8 NOT NULL,
-  `username` varchar(64) CHARACTER SET utf8 NOT NULL,
-  `text` text CHARACTER SET utf8 NOT NULL,
-  `answer` text CHARACTER SET utf8 NOT NULL,
-  `status` varchar(64) CHARACTER SET utf8 NOT NULL,
-  `adminID` varchar(64) CHARACTER SET utf8 NOT NULL,
-  `adminName` varchar(64) CHARACTER SET utf8 NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+  `tgid` varchar(64) CHARACTER SET utf8mb4 NOT NULL,
+  `name` varchar(64) CHARACTER SET utf8mb4 NOT NULL,
+  `username` varchar(64) CHARACTER SET utf8mb4 NOT NULL,
+  `text` text CHARACTER SET utf8mb4 NOT NULL,
+  `answer` text CHARACTER SET utf8mb4 NOT NULL,
+  `status` varchar(64) CHARACTER SET utf8mb4 NOT NULL,
+  `adminID` varchar(64) CHARACTER SET utf8mb4 NOT NULL,
+  `adminName` varchar(64) CHARACTER SET utf8mb4 NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 ALTER TABLE `MessFeedback`
   ADD PRIMARY KEY (`id`);
 ALTER TABLE `MessFeedback`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
-

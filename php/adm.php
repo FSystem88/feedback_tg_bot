@@ -7,6 +7,8 @@ $tgid = $_POST['tgid'];
 $username = $_POST['username'];
 $name = $_POST['name'];
 
+mysqli_set_charset($link, "utf8mb4");
+
 if ($data == "admins")
 {
 	$result = mysqli_query($link, "SELECT * FROM AdminsFeedback WHERE status NOT LIKE 'user'");

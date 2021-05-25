@@ -5,6 +5,10 @@
 import telebot, requests as r, time, threading
 from telebot import types
 from threading import Thread
+
+from fake_headers import Headers
+headers = Headers(headers=True).generate()
+
 bot = telebot.TeleBot("")
 
 NAME = " ИМЯ ВАШЕГО МАГАЗИНА/БРЭНДА/КАНАЛА "
@@ -12,20 +16,21 @@ url = "https://example.com/feedback_tg_bot/php/"
 # ВМЕСТО example.com НА ПИШИТЕ ВАШ САЙТ ГДЕ ВЫ РАЗМЕСТИЛИ API (папку php из этого репозитория)
 # либо просто напишите мне @FSystem88_bot и я за скромную плату смогу разместить API и БД у себя на web сервере 
 
+
 ######################################################### / C O M M A N D S ##############################################################
 
 
 @bot.message_handler(commands=['start'])
 def start(message):
 	try:
-		res = r.post(url+"adm.php", data={"data":"find","tgid": message.chat.id}).json()
+		res = r.post(url+"adm.php", data={"data":"find","tgid": message.chat.id}, headers=headers).json()
 		if res == []:
 			r.post(url+"adm.php", data={
 				"data":"adduser",
 				"tgid": message.chat.id,
 				"name": message.chat.first_name,
 				"username": message.chat.username
-			} )
+			}, headers=headers )
 		if str(message.chat.id) in owners():
 			Home(message)
 		else:
@@ -41,7 +46,7 @@ def getadmin(message):
 	if str(message.chat.id) in owners():
 		bot.send_message(message.chat.id, "<b>Вы уже администратор!</b>", parse_mode="html")
 	else:
-		res = r.post(url+"adm.php", data={"data":"god"}).json()
+		res = r.post(url+"adm.php", data={"data":"god"}, headers=headers).json()
 		idgod = res[0]['tgid']
 		key = types.InlineKeyboardMarkup()
 		but1 = types.InlineKeyboardButton(text="Принять", callback_data="addadmin{}".format(message.chat.id))
@@ -54,7 +59,7 @@ def getadmin(message):
 @bot.message_handler(commands=['restart'])
 def restart(message):
 	if str(message.chat.id) in owners():
-		r.post(url+"adm.php", data={"data":"update", "tgid":message.chat.id, "name":message.chat.first_name, "username":message.chat.username})
+		r.post(url+"adm.php", data={"data":"update", "tgid":message.chat.id, "name":message.chat.first_name, "username":message.chat.username}, headers=headers)
 		bot.send_message(message.chat.id, "<b>Поздравляю, Вы администратор {}!</b>".format(NAME), parse_mode="html")
 		Home(message)
 
@@ -64,14 +69,14 @@ def restart(message):
 
 def owners():
 	owns = []
-	res = r.post(url+"adm.php", data={"data":"admins"}).json()
+	res = r.post(url+"adm.php", data={"data":"admins"}, headers=headers).json()
 	for i in res:
 		owns.append(i['tgid'])
 	return owns
 
 
 def Home(message):
-	res = r.post(url+"adm.php", data={"data":"god"}).json()
+	res = r.post(url+"adm.php", data={"data":"god"}, headers=headers).json()
 	idgod = res[0]['tgid']
 	keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
 	if str(message.chat.id) == idgod:
@@ -82,7 +87,7 @@ def Home(message):
 
 
 def admins(message):
-	res = r.post(url+"adm.php", data={"data":"god"}).json()
+	res = r.post(url+"adm.php", data={"data":"god"}, headers=headers).json()
 	idgod = res[0]['tgid']
 	if str(message.chat.id) == idgod:
 		keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -91,7 +96,7 @@ def admins(message):
 		keyboard.row('Отправить всем сообщение')
 		keyboard.row('Домой')
 		bot.send_message(message.chat.id, "Все админы:", reply_markup=keyboard)
-		res = r.post(url+"adm.php", data={"data":"admins"}).json()
+		res = r.post(url+"adm.php", data={"data":"admins"}, headers=headers).json()
 		for own in res:
 			if own['status'] == "god":
 				bot.send_message(message.chat.id, "<b>БОГ</b>\nИмя: <a href='tg://user?id={}'>{}</a>\n@{}".format(own['tgid'], own['name'], own['username']), parse_mode="html")
@@ -110,7 +115,7 @@ def admins1(message):
 		bot.send_message(message.chat.id, "Чтобы добавить нового администратора надо чтобы кандидат отправил боту команду:\n\n/getadmin\n\nПринять заявку может только самый главный админ.")
 		bot.register_next_step_handler(message, admins1)
 	elif message.text == "Черный список":
-		res = r.post(url+"adm.php", data={"data":"allblock"}).json()
+		res = r.post(url+"adm.php", data={"data":"allblock"}, headers=headers).json()
 		if res == []:
 			bot.send_message(message.chat.id, "Черный список пуст!")
 		else:
@@ -138,7 +143,7 @@ def sends(message):
 	if message.text == "Отмена":
 		admins(message)
 	else:
-		res = r.post(url+"adm.php", data={"data":"user"}).json()
+		res = r.post(url+"adm.php", data={"data":"user"}, headers=headers).json()
 		for user in res:
 			thread_list = []
 			t = threading.Thread (target=sends1, args=(message, user['tgid'], message.text))
@@ -159,13 +164,13 @@ def block(message):
 	if message.text == "Отмена":
 		admins(message)
 	else:
-		res = r.post(url+"adm.php", data={"data":"find","tgid":message.text}).json()
+		res = r.post(url+"adm.php", data={"data":"find","tgid":message.text}, headers=headers).json()
 		if res == []:
 			bot.send_message(message.chat.id, "Пользователь не найден")
 			bot.register_next_step_handler(message, block)
 		else:
 			bot.send_message(message.chat.id, "‼️ ЗАБЛОКИРОВАН ‼️\n<a href='tg://user?id={}'>{}</a> (@{})\nID: <code>{}</code>".format(res[0]['tgid'], res[0]['name'], res[0]['username'], res[0]['tgid']), parse_mode="html")
-			r.post(url+"adm.php", data={"data":"block", "tgid":res[0]['tgid']})
+			r.post(url+"adm.php", data={"data":"block", "tgid":res[0]['tgid']}, headers=headers)
 			admins(message)
 
 
@@ -185,13 +190,13 @@ def reply(message):
 			"adminName" : message.chat.first_name,
 			"text" : text,
 			"tgid" : tgid
-		})
+		}, headers=headers)
 		Home(message)
 
 
 def Messages(message):
 	if str(message.chat.id) in owners():
-		res = r.post(url+"mess.php", data={"data":"count"})
+		res = r.post(url+"mess.php", data={"data":"count"}, headers=headers)
 		cnt = res.text
 		keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
 		keyboard.row('Непрочитанные','Старые')
@@ -204,7 +209,7 @@ def Messages1(message):
 	if message.text == "Домой":
 		Home(message)
 	elif message.text == "Непрочитанные":
-		res = r.post(url+"mess.php", data={"data":"unread"}).json()
+		res = r.post(url+"mess.php", data={"data":"unread"}, headers=headers).json()
 		if res == []:
 			bot.send_message(message.chat.id, "Пусто")
 		else:
@@ -216,7 +221,7 @@ def Messages1(message):
 				bot.send_message(message.chat.id, '''<b>От:</b> <a href='tg://user?id={}'>{}</a> (@{})\n<b>Текст:</b>\n<i>{}</i>'''.format(ask['tgid'], ask['name'], ask['username'], ask['text']), parse_mode="html", reply_markup=key)
 		bot.register_next_step_handler(message, Messages1)
 	elif message.text == "Старые":
-		res = r.post(url+"mess.php", data={"data":"old"}).json()
+		res = r.post(url+"mess.php", data={"data":"old"}, headers=headers).json()
 		if res == []:
 			bot.send_message(message.chat.id, "Пусто")
 		else:
@@ -234,7 +239,7 @@ def Messages1(message):
 
 @bot.message_handler(func=lambda message: True, content_types=['text'])
 def Main(message):
-	res = r.post(url+"adm.php", data={"data":"checkblock", "tgid":message.chat.id}).json()
+	res = r.post(url+"adm.php", data={"data":"checkblock", "tgid":message.chat.id}, headers=headers).json()
 	if res == []:
 		TEXT = message.text
 		if TEXT == "Домой":
@@ -245,7 +250,7 @@ def Main(message):
 			Messages(message)
 		else:
 			if str(message.chat.id) not in owners():
-				r.post(url+"mess.php", data={"data":"new","tgid":message.chat.id,"name":message.chat.first_name,"username":message.chat.username,"text":message.text})
+				r.post(url+"mess.php", data={"data":"new","tgid":message.chat.id,"name":message.chat.first_name,"username":message.chat.username,"text":message.text}, headers=headers)
 				for own in owners():
 					key = types.InlineKeyboardMarkup()
 					but1 = types.InlineKeyboardButton(text="Ответить", callback_data="reply{}".format(message.chat.id))
@@ -265,13 +270,13 @@ def inline(call):
 		_tgid = call.data[6:]
 		bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="<i>Удалено</i>", parse_mode="html")
 		arr = call.message.text.split("\nТекст:\n", 1)[1]
-		r.post(url+"mess.php", data={"data":"delete", "text":arr, 'tgid':_tgid})
+		r.post(url+"mess.php", data={"data":"delete", "text":arr, 'tgid':_tgid}, headers=headers)
 	
 	elif call.data[:7] == "ddelete":
 		_tgid = call.data[7:]
 		bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="<i>Удалено</i>", parse_mode="html")
 		arr = call.message.text.split("\nТекст:\n", 1)[1].split("\nАдмин:")[0]
-		r.post(url+"mess.php", data={"data":"delete", "text":arr, 'tgid':_tgid})
+		r.post(url+"mess.php", data={"data":"delete", "text":arr, 'tgid':_tgid}, headers=headers)
 		
 	elif call.data[:8] == "deladmin":
 		key = types.InlineKeyboardMarkup()
@@ -285,13 +290,13 @@ def inline(call):
 	
 	elif call.data[:9] == "deldeladm":
 		_tgid = call.data[9:]
-		r.post(url+"adm.php", data={"data":"delete", "tgid":_tgid})
+		r.post(url+"adm.php", data={"data":"delete", "tgid":_tgid}, headers=headers)
 		bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="<b>Администратор удалён</b>", parse_mode="html")
 		
 	elif call.data[:8] == "addadmin":
 		bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="<i>Заявка принята</i>", parse_mode="html")
 		_tgid = call.data[8:]
-		r.post(url+"adm.php", data={"data":"addadmin", "tgid":_tgid})
+		r.post(url+"adm.php", data={"data":"addadmin", "tgid":_tgid}, headers=headers)
 		bot.send_message(_tgid, "<b>Ваша заявка на администрирование принята!\n\nАктивируйте администрирование:</b>\n/restart", parse_mode="html")
 	
 	elif call.data[:9] == "failadmin":
@@ -320,7 +325,7 @@ def inline(call):
 	elif call.data[:6] == "delban":
 		_tgid = call.data[6:]
 		bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="<i>Пользователь разблокирован</i>", parse_mode="html")
-		r.post(url+"adm.php", data={"data":"delblock", "tgid":_tgid})
+		r.post(url+"adm.php", data={"data":"delblock", "tgid":_tgid}, headers=headers)
 
 
 ######################################################## L A U N C H #####################################################################
