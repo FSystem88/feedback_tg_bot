@@ -6,16 +6,13 @@ import telebot, cloudscraper as cs, time, threading
 from telebot import types
 from telebot import *
 from telebot.types import *
-from threading import Thread
-
-from fake_headers import Headers
-headers = Headers(headers=True).generate()
 
 bot = telebot.TeleBot("")
 
 r = cs.session()
 NAME = " ИМЯ ВАШЕГО МАГАЗИНА/БРЭНДА/КАНАЛА "
 url = "https://example.com/feedback_tg_bot/php/"
+
 # ВМЕСТО example.com НА ПИШИТЕ ВАШ САЙТ ГДЕ ВЫ РАЗМЕСТИЛИ API (папку php из этого репозитория)
 # либо просто напишите мне @FSystem88_bot и я за скромную плату смогу разместить API и БД у себя на web сервере 
 
@@ -26,14 +23,14 @@ url = "https://example.com/feedback_tg_bot/php/"
 @bot.message_handler(commands=['start'])
 def start(message: Message):
 	try:
-		res = r.post(url+"adm.php", data={"data":"find","tgid": message.chat.id}, headers=headers).json()
+		res = r.post(url+"adm.php", data={"data":"find","tgid": message.chat.id}).json()
 		if res == []:
 			r.post(url+"adm.php", data={
 				"data":"adduser",
 				"tgid": message.chat.id,
 				"name": message.chat.first_name,
 				"username": message.chat.username
-			}, headers=headers )
+			} )
 		if str(message.chat.id) in owners():
 			Home(message)
 		else:
@@ -49,7 +46,7 @@ def getadmin(message: Message):
 	if str(message.chat.id) in owners():
 		bot.send_message(message.chat.id, "<b>Вы уже администратор!</b>", parse_mode="html")
 	else:
-		res = r.post(url+"adm.php", data={"data":"god"}, headers=headers).json()
+		res = r.post(url+"adm.php", data={"data":"god"}).json()
 		idgod = res[0]['tgid']
 		key = types.InlineKeyboardMarkup()
 		but1 = types.InlineKeyboardButton(text="Принять", callback_data="addadmin{}".format(message.chat.id))
@@ -62,7 +59,7 @@ def getadmin(message: Message):
 @bot.message_handler(commands=['restart'])
 def restart(message: Message):
 	if str(message.chat.id) in owners():
-		r.post(url+"adm.php", data={"data":"update", "tgid":message.chat.id, "name":message.chat.first_name, "username":message.chat.username}, headers=headers)
+		r.post(url+"adm.php", data={"data":"update", "tgid":message.chat.id, "name":message.chat.first_name, "username":message.chat.username})
 		bot.send_message(message.chat.id, "<b>Поздравляю, Вы администратор {}!</b>".format(NAME), parse_mode="html")
 		Home(message)
 
@@ -72,14 +69,14 @@ def restart(message: Message):
 
 def owners():
 	owns = []
-	res = r.post(url+"adm.php", data={"data":"admins"}, headers=headers).json()
+	res = r.post(url+"adm.php", data={"data":"admins"}).json()
 	for i in res:
 		owns.append(i['tgid'])
 	return owns
 
 
 def Home(message: Message):
-	res = r.post(url+"adm.php", data={"data":"god"}, headers=headers).json()
+	res = r.post(url+"adm.php", data={"data":"god"}).json()
 	idgod = res[0]['tgid']
 	keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
 	if str(message.chat.id) == idgod:
@@ -90,7 +87,7 @@ def Home(message: Message):
 
 
 def admins(message: Message):
-	res = r.post(url+"adm.php", data={"data":"god"}, headers=headers).json()
+	res = r.post(url+"adm.php", data={"data":"god"}).json()
 	idgod = res[0]['tgid']
 	if str(message.chat.id) == idgod:
 		keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -99,7 +96,7 @@ def admins(message: Message):
 		keyboard.row('Отправить всем сообщение')
 		keyboard.row('Домой')
 		bot.send_message(message.chat.id, "Все админы:", reply_markup=keyboard)
-		res = r.post(url+"adm.php", data={"data":"admins"}, headers=headers).json()
+		res = r.post(url+"adm.php", data={"data":"admins"}).json()
 		for own in res:
 			if own['status'] == "god":
 				bot.send_message(message.chat.id, "<b>БОГ</b>\nИмя: <a href='tg://user?id={}'>{}</a>\n@{}".format(own['tgid'], own['name'], own['username']), parse_mode="html")
@@ -118,7 +115,7 @@ def admins1(message: Message):
 		bot.send_message(message.chat.id, "Чтобы добавить нового администратора надо чтобы кандидат отправил боту команду:\n\n/getadmin\n\nПринять заявку может только самый главный админ.")
 		bot.register_next_step_handler(message, admins1)
 	elif message.text == "Черный список":
-		res = r.post(url+"adm.php", data={"data":"allblock"}, headers=headers).json()
+		res = r.post(url+"adm.php", data={"data":"allblock"}).json()
 		if res == []:
 			bot.send_message(message.chat.id, "Черный список пуст!")
 		else:
@@ -146,7 +143,7 @@ def sends(message: Message):
 	if message.text == "Отмена":
 		admins(message)
 	else:
-		res = r.post(url+"adm.php", data={"data":"user"}, headers=headers).json()
+		res = r.post(url+"adm.php", data={"data":"user"}).json()
 		for user in res:
 			threading.Thread (target=sends1, args=(user['tgid'], message.text)).start()
 			time.sleep(1)
@@ -165,13 +162,13 @@ def block(message: Message):
 	if message.text == "Отмена":
 		admins(message)
 	else:
-		res = r.post(url+"adm.php", data={"data":"find","tgid":message.text}, headers=headers).json()
+		res = r.post(url+"adm.php", data={"data":"find","tgid":message.text}).json()
 		if res == []:
 			bot.send_message(message.chat.id, "Пользователь не найден")
 			bot.register_next_step_handler(message, block)
 		else:
 			bot.send_message(message.chat.id, "‼️ ЗАБЛОКИРОВАН ‼️\n<a href='tg://user?id={}'>{}</a> (@{})\nID: <code>{}</code>".format(res[0]['tgid'], res[0]['name'], res[0]['username'], res[0]['tgid']), parse_mode="html")
-			r.post(url+"adm.php", data={"data":"block", "tgid":res[0]['tgid']}, headers=headers)
+			r.post(url+"adm.php", data={"data":"block", "tgid":res[0]['tgid']})
 			admins(message)
 
 
@@ -191,13 +188,13 @@ def reply(message: Message):
 			"adminName" : message.chat.first_name,
 			"text" : text,
 			"tgid" : tgid
-		}, headers=headers)
+		})
 		Home(message)
 
 
 def Messages(message: Message):
 	if str(message.chat.id) in owners():
-		res = r.post(url+"mess.php", data={"data":"count"}, headers=headers)
+		res = r.post(url+"mess.php", data={"data":"count"})
 		cnt = res.text
 		keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
 		keyboard.row('Непрочитанные','Старые')
@@ -210,7 +207,7 @@ def Messages1(message: Message):
 	if message.text == "Домой":
 		Home(message)
 	elif message.text == "Непрочитанные":
-		res = r.post(url+"mess.php", data={"data":"unread"}, headers=headers).json()
+		res = r.post(url+"mess.php", data={"data":"unread"}).json()
 		if res == []:
 			bot.send_message(message.chat.id, "Пусто")
 		else:
@@ -222,7 +219,7 @@ def Messages1(message: Message):
 				bot.send_message(message.chat.id, '''<b>От:</b> <a href='tg://user?id={}'>{}</a> (@{})\n<b>Текст:</b>\n<i>{}</i>'''.format(ask['tgid'], ask['name'], ask['username'], ask['text']), parse_mode="html", reply_markup=key)
 		bot.register_next_step_handler(message, Messages1)
 	elif message.text == "Старые":
-		res = r.post(url+"mess.php", data={"data":"old"}, headers=headers).json()
+		res = r.post(url+"mess.php", data={"data":"old"}).json()
 		if res == []:
 			bot.send_message(message.chat.id, "Пусто")
 		else:
@@ -240,7 +237,7 @@ def Messages1(message: Message):
 
 @bot.message_handler(func=lambda message: True, content_types=['text'])
 def Main(message: Message):
-	res = r.post(url+"adm.php", data={"data":"checkblock", "tgid":message.chat.id}, headers=headers).json()
+	res = r.post(url+"adm.php", data={"data":"checkblock", "tgid":message.chat.id}).json()
 	if res == []:
 		TEXT = message.text
 		if TEXT == "Домой":
@@ -251,7 +248,7 @@ def Main(message: Message):
 			Messages(message)
 		else:
 			if str(message.chat.id) not in owners():
-				r.post(url+"mess.php", data={"data":"new","tgid":message.chat.id,"name":message.chat.first_name,"username":message.chat.username,"text":message.text}, headers=headers)
+				r.post(url+"mess.php", data={"data":"new","tgid":message.chat.id,"name":message.chat.first_name,"username":message.chat.username,"text":message.text})
 				for own in owners():
 					key = types.InlineKeyboardMarkup()
 					but1 = types.InlineKeyboardButton(text="Ответить", callback_data="reply{}".format(message.chat.id))
@@ -271,13 +268,13 @@ def inline(call: CallbackQuery):
 		_tgid = call.data[6:]
 		bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="<i>Удалено</i>", parse_mode="html")
 		arr = call.message.text.split("\nТекст:\n", 1)[1]
-		r.post(url+"mess.php", data={"data":"delete", "text":arr, 'tgid':_tgid}, headers=headers)
+		r.post(url+"mess.php", data={"data":"delete", "text":arr, 'tgid':_tgid})
 	
 	elif call.data[:7] == "ddelete":
 		_tgid = call.data[7:]
 		bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="<i>Удалено</i>", parse_mode="html")
 		arr = call.message.text.split("\nТекст:\n", 1)[1].split("\nАдмин:")[0]
-		r.post(url+"mess.php", data={"data":"delete", "text":arr, 'tgid':_tgid}, headers=headers)
+		r.post(url+"mess.php", data={"data":"delete", "text":arr, 'tgid':_tgid})
 		
 	elif call.data[:8] == "deladmin":
 		key = types.InlineKeyboardMarkup()
@@ -291,13 +288,13 @@ def inline(call: CallbackQuery):
 	
 	elif call.data[:9] == "deldeladm":
 		_tgid = call.data[9:]
-		r.post(url+"adm.php", data={"data":"delete", "tgid":_tgid}, headers=headers)
+		r.post(url+"adm.php", data={"data":"delete", "tgid":_tgid})
 		bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="<b>Администратор удалён</b>", parse_mode="html")
 		
 	elif call.data[:8] == "addadmin":
 		bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="<i>Заявка принята</i>", parse_mode="html")
 		_tgid = call.data[8:]
-		r.post(url+"adm.php", data={"data":"addadmin", "tgid":_tgid}, headers=headers)
+		r.post(url+"adm.php", data={"data":"addadmin", "tgid":_tgid})
 		bot.send_message(_tgid, "<b>Ваша заявка на администрирование принята!\n\nАктивируйте администрирование:</b>\n/restart", parse_mode="html")
 	
 	elif call.data[:9] == "failadmin":
@@ -326,7 +323,7 @@ def inline(call: CallbackQuery):
 	elif call.data[:6] == "delban":
 		_tgid = call.data[6:]
 		bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="<i>Пользователь разблокирован</i>", parse_mode="html")
-		r.post(url+"adm.php", data={"data":"delblock", "tgid":_tgid}, headers=headers)
+		r.post(url+"adm.php", data={"data":"delblock", "tgid":_tgid})
 
 
 ######################################################## L A U N C H #####################################################################
