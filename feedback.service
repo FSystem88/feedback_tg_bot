@@ -1,0 +1,12 @@
+[Unit]
+Description=Feedback bot
+
+[Service]
+ExecStart=/root/feedback_tg_bot/bot.py
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Restart=on-failure
+RestartSec=1s
