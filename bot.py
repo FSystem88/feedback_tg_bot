@@ -2,8 +2,10 @@
 # -*- coding: utf-8 -*-
 # Dev: FSystem88
 
-import telebot, requests as r, time, threading
+import telebot, cloudscraper as cs, time, threading
 from telebot import types
+from telebot import *
+from telebot.types import *
 from threading import Thread
 
 from fake_headers import Headers
@@ -11,6 +13,7 @@ headers = Headers(headers=True).generate()
 
 bot = telebot.TeleBot("")
 
+r = cs.session()
 NAME = " ИМЯ ВАШЕГО МАГАЗИНА/БРЭНДА/КАНАЛА "
 url = "https://example.com/feedback_tg_bot/php/"
 # ВМЕСТО example.com НА ПИШИТЕ ВАШ САЙТ ГДЕ ВЫ РАЗМЕСТИЛИ API (папку php из этого репозитория)
@@ -21,7 +24,7 @@ url = "https://example.com/feedback_tg_bot/php/"
 
 
 @bot.message_handler(commands=['start'])
-def start(message):
+def start(message: Message):
 	try:
 		res = r.post(url+"adm.php", data={"data":"find","tgid": message.chat.id}, headers=headers).json()
 		if res == []:
@@ -42,7 +45,7 @@ def start(message):
 
 
 @bot.message_handler(commands=['getadmin'])
-def getadmin(message):
+def getadmin(message: Message):
 	if str(message.chat.id) in owners():
 		bot.send_message(message.chat.id, "<b>Вы уже администратор!</b>", parse_mode="html")
 	else:
@@ -57,7 +60,7 @@ def getadmin(message):
 
 
 @bot.message_handler(commands=['restart'])
-def restart(message):
+def restart(message: Message):
 	if str(message.chat.id) in owners():
 		r.post(url+"adm.php", data={"data":"update", "tgid":message.chat.id, "name":message.chat.first_name, "username":message.chat.username}, headers=headers)
 		bot.send_message(message.chat.id, "<b>Поздравляю, Вы администратор {}!</b>".format(NAME), parse_mode="html")
@@ -75,7 +78,7 @@ def owners():
 	return owns
 
 
-def Home(message):
+def Home(message: Message):
 	res = r.post(url+"adm.php", data={"data":"god"}, headers=headers).json()
 	idgod = res[0]['tgid']
 	keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -86,7 +89,7 @@ def Home(message):
 	bot.send_message(message.chat.id, "<b>Привет мой любимый админ ♥</b>", reply_markup=keyboard, parse_mode="html")
 
 
-def admins(message):
+def admins(message: Message):
 	res = r.post(url+"adm.php", data={"data":"god"}, headers=headers).json()
 	idgod = res[0]['tgid']
 	if str(message.chat.id) == idgod:
@@ -110,7 +113,7 @@ def admins(message):
 		bot.send_message(message.chat.id, "Эта функция доступна только главному администратору!")
 
 
-def admins1(message):
+def admins1(message: Message):
 	if message.text == "Добавить админа":
 		bot.send_message(message.chat.id, "Чтобы добавить нового администратора надо чтобы кандидат отправил боту команду:\n\n/getadmin\n\nПринять заявку может только самый главный админ.")
 		bot.register_next_step_handler(message, admins1)
@@ -139,28 +142,26 @@ def admins1(message):
 		Home(message)
 
 
-def sends(message):
+def sends(message: Message):
 	if message.text == "Отмена":
 		admins(message)
 	else:
 		res = r.post(url+"adm.php", data={"data":"user"}, headers=headers).json()
 		for user in res:
-			thread_list = []
-			t = threading.Thread (target=sends1, args=(message, user['tgid'], message.text))
-			thread_list.append(t)
-			t.start()
+			threading.Thread (target=sends1, args=(user['tgid'], message.text)).start()
+			time.sleep(1)
 		bot.send_message(message.chat.id, "Отправлено!")
 		Home(message)
 
 
-def sends1(message, tgid, text):
+def sends1(tgid, text):
 	try:
 		bot.send_message(tgid, text)
 	except:
 		pass
 
 
-def block(message):
+def block(message: Message):
 	if message.text == "Отмена":
 		admins(message)
 	else:
@@ -174,7 +175,7 @@ def block(message):
 			admins(message)
 
 
-def reply(message):
+def reply(message: Message):
 	global tgid
 	global text
 	if message.text == "Отмена":
@@ -194,7 +195,7 @@ def reply(message):
 		Home(message)
 
 
-def Messages(message):
+def Messages(message: Message):
 	if str(message.chat.id) in owners():
 		res = r.post(url+"mess.php", data={"data":"count"}, headers=headers)
 		cnt = res.text
@@ -205,7 +206,7 @@ def Messages(message):
 		bot.register_next_step_handler(message, Messages1)
 
 
-def Messages1(message):
+def Messages1(message: Message):
 	if message.text == "Домой":
 		Home(message)
 	elif message.text == "Непрочитанные":
@@ -238,7 +239,7 @@ def Messages1(message):
 
 
 @bot.message_handler(func=lambda message: True, content_types=['text'])
-def Main(message):
+def Main(message: Message):
 	res = r.post(url+"adm.php", data={"data":"checkblock", "tgid":message.chat.id}, headers=headers).json()
 	if res == []:
 		TEXT = message.text
@@ -265,7 +266,7 @@ def Main(message):
 
 
 @bot.callback_query_handler(func=lambda call: True)
-def inline(call):
+def inline(call: CallbackQuery):
 	if call.data[:6] == "delete":
 		_tgid = call.data[6:]
 		bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="<i>Удалено</i>", parse_mode="html")
