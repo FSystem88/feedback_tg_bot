@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python3.10
 # -*- coding: utf-8 -*-
 # Dev: FSystem88
 
@@ -11,7 +11,7 @@ bot = telebot.TeleBot("")
 
 r = cs.session()
 NAME = " ИМЯ ВАШЕГО МАГАЗИНА/БРЭНДА/КАНАЛА "
-url = "https://example.com/feedback_tg_bot/php/"
+url = "http://127.0.0.1/feedback_tg_bot/php/"
 
 # ВМЕСТО example.com НА ПИШИТЕ ВАШ САЙТ ГДЕ ВЫ РАЗМЕСТИЛИ API (папку php из этого репозитория)
 # либо просто напишите мне @FSystem88_bot и я за скромную плату смогу разместить API и БД у себя на web сервере 
