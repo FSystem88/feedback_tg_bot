@@ -2,11 +2,11 @@
 DROP TABLE IF EXISTS `AdminsFeedback`;
 CREATE TABLE `AdminsFeedback` (
   `id` int(11) NOT NULL,
-  `tgid` varchar(64) CHARACTER SET utf8mb4 NOT NULL,
-  `name` varchar(64) CHARACTER SET utf8mb4 NOT NULL,
-  `username` varchar(64) CHARACTER SET utf8mb4 NOT NULL,
-  `status` varchar(64) CHARACTER SET utf8mb4 NOT NULL,
-  `ban` varchar(3) CHARACTER SET utf8mb4 NOT NULL
+  `tgid` varchar(64) CHARACTER SET utf8mb4 NULL,
+  `name` varchar(64) CHARACTER SET utf8mb4 NULL,
+  `username` varchar(64) CHARACTER SET utf8mb4 NULL,
+  `status` varchar(64) CHARACTER SET utf8mb4 NULL,
+  `ban` varchar(3) CHARACTER SET utf8mb4 NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `AdminsFeedback` (`id`, `tgid`, `name`, `username`, `status`) VALUES
@@ -24,14 +24,14 @@ ALTER TABLE `AdminsFeedback`
 DROP TABLE IF EXISTS `MessFeedback`;
 CREATE TABLE `MessFeedback` (
   `id` int(11) NOT NULL,
-  `tgid` varchar(64) CHARACTER SET utf8mb4 NOT NULL,
-  `name` varchar(64) CHARACTER SET utf8mb4 NOT NULL,
-  `username` varchar(64) CHARACTER SET utf8mb4 NOT NULL,
-  `text` text CHARACTER SET utf8mb4 NOT NULL,
-  `answer` text CHARACTER SET utf8mb4 NOT NULL,
-  `status` varchar(64) CHARACTER SET utf8mb4 NOT NULL,
-  `adminID` varchar(64) CHARACTER SET utf8mb4 NOT NULL,
-  `adminName` varchar(64) CHARACTER SET utf8mb4 NOT NULL
+  `tgid` varchar(64) CHARACTER SET utf8mb4 NULL,
+  `name` varchar(64) CHARACTER SET utf8mb4 NULL,
+  `username` varchar(64) CHARACTER SET utf8mb4 NULL,
+  `text` text CHARACTER SET utf8mb4 NULL,
+  `answer` text CHARACTER SET utf8mb4 NULL,
+  `status` varchar(64) CHARACTER SET utf8mb4 NULL,
+  `adminID` varchar(64) CHARACTER SET utf8mb4 NULL,
+  `adminName` varchar(64) CHARACTER SET utf8mb4 NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 ALTER TABLE `MessFeedback`
